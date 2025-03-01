@@ -1,0 +1,104 @@
+era5: &era5
+  type: "era5_npy_f32"
+  data_dir: 'era5_new:s3://era5_np_float32'
+  length: 3
+  file_stride: 1
+  sample_stride: 6
+  years:
+    train: ['1979-01-01 00:00:00', '2017-12-31 23:00:00']
+    valid: ['2018-01-01 00:00:00', '2018-12-31 23:00:00']
+    test: ['2018-01-01 00:00:00', '2018-12-31 23:00:00']
+    all: ['1979-01-01 00:00:00', '2020-12-31 23:00:00']
+  vnames:
+    constants: []
+    single_level_vnames: ['u10', 'v10', 't2m', 'msl']
+    multi_level_vnames: ['z', 'q', 'u', 'v', 't']
+    hight_level_list: [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
+
+
+
+model:
+  type: "mts2d_model"
+  params:
+    sub_model:
+      lgunet_all:
+        img_size: [721, 1440]
+        patch_size: [3, 2]
+        stride: [2, 2]
+        inchans_list: [4, 13, 13, 13, 13, 13, 4, 13, 13, 13, 13, 13]
+        outchans_list: [8, 26, 26, 26, 26, 26]
+        in_chans: 138
+        out_chans: 138
+        enc_dim: 96
+        embed_dim: 1152
+        window_size: [6, 12]
+        enc_depths: [2, 2, 2]
+        enc_heads: [3, 6, 6]
+        lg_depths: [4, 4, 4]
+        lg_heads: [6, 6, 6]
+        Weather_T: 1
+        drop_path: 0.
+        use_checkpoint: true
+        inp_length: 2
+        use_mlp: False
+
+    use_ceph: True
+    save_best: &loss_type "Possloss"
+    metrics_list: ["MAE", "MSE"]
+    use_fsdp: false
+
+    optimizer:
+      lgunet_all:
+        type: "AdamW"
+        params:
+          lr: 0.0005
+          betas: [0.9, 0.9]
+
+      
+    
+    lr_scheduler:
+      lgunet_all:
+        by_step: True
+        sched: cosine
+        epochs: &maxepoch 25
+        min_lr: 0.
+        warmup_lr: 0.00000001
+        warmup_epochs: 0
+        lr_noise: 
+        cooldown_epochs: 0
+
+    extra_params:
+      two_step_training: False
+      loss_type: *loss_type
+      enabled_amp: False
+      use_noise: False
+      weight_begin_index: 4
+      weight_end_index: 17
+      weight_number: 0.1
+      checkpoint_dir: "cephnew:s3://weatherbench/checkpoint"
+
+
+
+dataset:
+  train:
+    <<: *era5
+    file_stride: 1
+    sample_stride: 6
+
+  test:
+    <<: *era5
+    file_stride: 1
+    sample_stride: 6
+
+
+
+dataloader:
+  num_workers: 4
+  pin_memory: False
+  prefetch_factor: 2
+  persistent_workers: True
+
+trainer:
+  batch_size: 1
+  test_batch_size: 1
+  max_epoch: *maxepoch
