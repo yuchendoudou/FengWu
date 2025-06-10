@@ -8,6 +8,12 @@ This repository presents the training code of FengWu, a deep learning-based weat
 pip install -r requirements.txt
 ```
 
+## Train
+
+```
+./train_script.sh
+```
+
 ## Files
 
 ```plain
