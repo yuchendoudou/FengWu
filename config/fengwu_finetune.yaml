@@ -1,5 +1,5 @@
 era5: &era5
-  type: "era5_npy_f32"
+  type: "era5_finetune_f32"
   data_dir: 'era5_new:s3://era5_np_float32'
   length: 3
   file_stride: 1
@@ -18,7 +18,7 @@ era5: &era5
 
 
 model:
-  type: "mts2d_model"
+  type: "mts2d_finetune"
   params:
     sub_model:
       lgunet_all:
@@ -45,22 +45,20 @@ model:
     use_ceph: True
     save_best: &loss_type "Possloss"
     metrics_list: ["MAE", "MSE"]
-    use_fsdp: false
 
     optimizer:
       lgunet_all:
         type: "AdamW"
         params:
-          lr: 0.0005
+          lr: 0.000005
           betas: [0.9, 0.9]
-
-      
+    
     
     lr_scheduler:
       lgunet_all:
         by_step: True
         sched: cosine
-        epochs: &maxepoch 25
+        epochs: &maxepoch 4
         min_lr: 0.
         warmup_lr: 0.00000001
         warmup_epochs: 0
@@ -72,7 +70,14 @@ model:
       loss_type: *loss_type
       enabled_amp: False
       use_noise: False
+      finetune_cycle_num: 5
       checkpoint_dir: "cephnew:s3://weatherbench/checkpoint"
+      whether_save_checkpoint: True
+      save_best: False
+      checkpoint_path: "lgunet_alldata_13level/world_size32-era5_lgunet_alldata_13level/checkpoint_latest.pth"
+      replay_buff:
+        inp_shape: [138, 721, 1440]
+        max_size: 100
 
 
 
@@ -84,14 +89,14 @@ dataset:
 
   test:
     <<: *era5
-    file_stride: 1
-    sample_stride: 6
+    file_stride: 6
+    sample_stride: 1
 
 
 
 dataloader:
   num_workers: 4
-  pin_memory: False
+  pin_memory: True
   prefetch_factor: 2
   persistent_workers: True
 
@@ -99,3 +104,5 @@ trainer:
   batch_size: 1
   test_batch_size: 1
   max_epoch: *maxepoch
+
+

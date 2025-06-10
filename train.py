@@ -139,7 +139,6 @@ if __name__ == "__main__":
     parser.add_argument('--cuda',                           type = int,     default = 0,                                            help = 'cuda id')
     parser.add_argument('--world_size',                     type = int,     default = 1,                                            help = 'Number of progress')
     parser.add_argument('--per_cpus',                       type = int,     default = 1,                                            help = 'Number of perCPUs to use')
-    # parser.add_argument('--world_size',     type = int,     default = -1,                                           help = 'number of distributed processes')
     parser.add_argument('--init_method',                    type = str,     default='tcp://127.0.0.1:23456',                        help = 'multi process init method')
     parser.add_argument('--outdir',                         type = str,     default='./IF_WKP',  help = 'Where to save the results')
     parser.add_argument('--cfg', '-c',                      type = str,     default = os.path.join('configs', 'default.yaml'),      help = 'path to the configuration file')

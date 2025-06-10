@@ -1,7 +1,7 @@
 #!/bin/bash
 
-gpus=2
-node_num=1
+gpus=32
+node_num=4
 single_gpus=`expr $gpus / $node_num`
 
 cpus=4
@@ -23,7 +23,7 @@ echo $PORT
 
 
 # reserved
-srun -p ai4earth --kill-on-bad-exit=1 --job-name=lgunet_vae_large -x SH-IDC1-10-140-24-17 --quotatype=spot --ntasks-per-node=$single_gpus --cpus-per-task=10 -N $node_num -o job2/%j.out --gres=gpu:$single_gpus --async python -u train.py \
+srun -p ai4earth --kill-on-bad-exit=1 --quotatype=spot --ntasks-per-node=$single_gpus --cpus-per-task=10 -N $node_num -o job2/%j.out --gres=gpu:$single_gpus --async python -u train.py \
 --init_method 'tcp://127.0.0.1:'$PORT   \
 -c ./config/fengwu.yaml \
 --world_size $gpus   \
@@ -31,7 +31,6 @@ srun -p ai4earth --kill-on-bad-exit=1 --job-name=lgunet_vae_large -x SH-IDC1-10-
 --tensor_model_parallel_size 1                  \
 --pipeline_model_parallel_size 1                  \
 --outdir './test_results' \
---resume_from_config                        \
 --desc   'fengwu'    
 
 
