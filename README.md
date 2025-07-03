@@ -1,4 +1,4 @@
-# FengWu: Advancing Global Medium-Range Weather Forecasting through Machine Learning
+# FengWu: The operational medium-range deterministic weather forecasting can be extended beyond a 10-day lead time
 
 This repository presents the training code of FengWu, a deep learning-based weather forecasting model that pushes the skillful global weather forecasts beyond 10 days lead. 
 
